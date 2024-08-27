@@ -1,7 +1,7 @@
 package com.strix_invoice.app.controller;
 
 import com.strix_invoice.app.Entity.Users;
-import com.strix_invoice.app.service.UsersService;
+import com.strix_invoice.app.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +15,7 @@ import java.util.List;
 public class UsersControllers {
 
     @Autowired
-    private UsersService usersService;
+    private AuthenticationService authenticationService;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -23,12 +23,19 @@ public class UsersControllers {
     @PostMapping("/register")
     public Users register(@RequestBody Users users){
         users.setPassword(passwordEncoder.encode(users.getPassword()));
-        return usersService.register(users);
+        return authenticationService.register(users);
     }
+
+    @PostMapping("/login")
+    public String login(@RequestBody Users users){
+        return authenticationService.authenticateUser(users);
+    }
+
+
 
     @GetMapping("/users")
     public List<Users> getAllUsers(){
-        return usersService.getAllUsers();
+        return authenticationService.getAllUsers();
     }
 
 }

@@ -35,6 +35,11 @@ public class AuthenticationService {
         }
     }
 
+    public Users getUserByUserName(String userName){
+        Users user = usersRepository.findByUsername(userName);
+        return user;
+    }
+
 
     public List<Users> getAllUsers() {
         return usersRepository.findAll();

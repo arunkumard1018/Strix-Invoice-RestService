@@ -19,8 +19,12 @@ public class StrixInvoiceApplication {
 		return new WebMvcConfigurer() {
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-						.allowedMethods("*")
-						.allowedOrigins("http://localhost:5173/");
+						.allowedOrigins("http://localhost:3000") // Allow only your frontend domain
+						.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+						.allowCredentials(true) // Allow cookies to be included
+						.allowedHeaders("*") // Allow any headers
+						.exposedHeaders("Authorization") // Expose any needed headers
+						.maxAge(3600); // Cache preflight requests for an hour
 			}
 		};
 	}

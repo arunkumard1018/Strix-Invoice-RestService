@@ -1,39 +1,39 @@
 package com.strix_invoice.app.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.strix_invoice.app.records.UserRole;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import java.util.Set;
 
 @Entity
+@Data
 public class Users {
     @Id
-    @GeneratedValue
-    private Integer id;
-
-    private String username;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @NotNull
+    @Column(unique = true)
+    private String email;
+    @NotNull
     private String password;
 
-    public Integer getId() {
-        return id;
-    }
+    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id"))
+    @Enumerated(EnumType.STRING)
+    @JsonIgnore
+    private Set<UserRole> roles;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id")
+    @JsonIgnore
+    private UsersInfo usersInfo;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    private Boolean isVerified;
+    private String verificationToken;
+    private String verificationTokenExpiresOn;
+    private String forgotPasswordToken;
+    private String forgotPasswordTokenExpiresOn;
 }

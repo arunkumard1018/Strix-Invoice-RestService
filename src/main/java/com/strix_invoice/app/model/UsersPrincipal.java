@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class UsersPrincipal implements UserDetails {
 
@@ -18,7 +20,10 @@ public class UsersPrincipal implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("USER"));
+        Set<GrantedAuthority> authorities = users.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))  // Prefix "ROLE_" for Spring Security
+                .collect(Collectors.toSet());
+        return authorities;
     }
 
     @Override
@@ -28,7 +33,7 @@ public class UsersPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return users.getUsername();
+        return users.getEmail();
     }
 
     @Override
@@ -49,5 +54,9 @@ public class UsersPrincipal implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public Long getUserId() {
+        return users.getId();
     }
 }

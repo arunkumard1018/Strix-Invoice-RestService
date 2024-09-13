@@ -36,7 +36,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // Bearer EXAMPLETOKENTOKENNNDGDFSJSKHSFHSAFDJHAGDTHFRDAGH
         final String authorizationHeader = request.getHeader("Authorization");
         Cookie[] cookies = request.getCookies();
         Cookie jwtCookie = null;
@@ -48,18 +47,10 @@ public class JWTFilter extends OncePerRequestFilter {
         }
         String username = null;
         String jwtToken = null;
-//        System.out.println(jwtCookie.getValue()+"  Cookie Token");
 
         if (jwtCookie != null) {
-            System.out.println(jwtCookie.getValue() + "Aruna");
             jwtToken = jwtCookie.getValue();
         }
-
-//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-//            jwtToken = authorizationHeader.substring(7);
-//            username = jwtService.extractUsername(jwtToken);
-//        }
-        System.out.println(jwtToken + " Bearer Jwt Token");
         try{
             if (jwtCookie != null && jwtToken != null) {
                 username = jwtService.extractUsername(jwtToken);
@@ -72,8 +63,6 @@ public class JWTFilter extends OncePerRequestFilter {
             cookie.setMaxAge(0); // Expire the cookie
             response.addCookie(cookie);
             System.out.println("Error Fetching User");
-            return;
-//            e.printStackTrace();
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {

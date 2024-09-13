@@ -1,6 +1,10 @@
-package com.strix_invoice.app.controller;
+package com.strix_invoice.app.api;
 
 import com.strix_invoice.app.Entity.Users;
+import com.strix_invoice.app.exceptions.custom.UserAlreadyExistsException;
+import com.strix_invoice.app.model.RegisterUserInfo;
+import com.strix_invoice.app.model.UsersPrincipal;
+import com.strix_invoice.app.records.UserRecord;
 import com.strix_invoice.app.service.AuthenticationService;
 import com.strix_invoice.app.service.JWTService;
 import jakarta.servlet.http.Cookie;
@@ -9,6 +13,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @RestController
+@RequestMapping("${api.base-path}")
 public class AuthenticationControllers {
 
     @Autowired
@@ -28,24 +36,32 @@ public class AuthenticationControllers {
     private JWTService jwtService;
 
     @PostMapping("/register")
-    public Users register(@RequestBody Users users) {
-        System.out.println(users.getUsername() + " " + users.getPassword());
-        users.setPassword(passwordEncoder.encode(users.getPassword()));
-        return authenticationService.register(users);
+    public ResponseEntity<Object> register(@RequestBody RegisterUserInfo user) {
+        System.out.println(user);
+        Users checkUser = authenticationService.findByEmail(user.getEmail());
+        if (checkUser == null) {
+            try {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                Users registerUser = authenticationService.register(user);
+                return ResponseEntity.status(HttpStatus.CREATED).build();
+            } catch (Error e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            }
+        }
+        throw new UserAlreadyExistsException("email Already registered");
     }
 
     @PostMapping("/login")
-    public UserModel login(@RequestBody Users users) {
-        System.out.println(users.getUsername() + " " + users.getPassword());
+    public UserRecord login(@RequestBody Users users) {
         String token = authenticationService.authenticateUser(users);
-        Users user = authenticationService.getUserByUserName(users.getUsername());
-        return new UserModel(user.getUsername(), user.getId(), "DVG", token);
+        Users user = authenticationService.findByEmail(users.getEmail());
+        return new UserRecord(user.getEmail(), user.getId(), "DVG", token);
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody Users users, HttpServletResponse response) {
         // Authenticate user and generate JWT token (details omitted)
-        System.out.println(users.getUsername() + " " + users.getPassword());
+        System.out.println(users.getEmail() + " " + users.getPassword());
 
         try {
             String token = authenticationService.authenticateUser(users);
@@ -57,7 +73,7 @@ public class AuthenticationControllers {
             response.addCookie(cookie);
             return ResponseEntity.ok("Login successful");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
         }
     }
 
@@ -85,7 +101,7 @@ public class AuthenticationControllers {
     }
 
     @GetMapping("/me")
-    public UserModel getUser(HttpServletRequest request) {
+    public UserRecord getUser(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         Cookie jwtCookie = null;
         if (cookies != null) {
@@ -102,15 +118,34 @@ public class AuthenticationControllers {
         if (jwtCookie != null && jwtToken != null) {
             username = jwtService.extractUsername(jwtToken);
         }
-        Users user = authenticationService.getUserByUserName(username);
-        return new UserModel(user.getUsername(), user.getId(), "DVG", "Sample token");
+        Users user = authenticationService.findByEmail(username);
+        return new UserRecord(user.getEmail(), user.getId(), "DVG", "Sample token");
     }
 
     @GetMapping("/users")
     public List<Users> getAllUsers() {
         return authenticationService.getAllUsers();
     }
-}
 
-record UserModel(String email, int userId, String city, String token) {
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/users-info")
+    public UserRecord getUserInfo(HttpServletRequest request) {
+        // Jwt Token is already verified in a filter or interceptor
+
+        // Retrieve the authenticated user's details from Spring Security context
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName(); // This should give you the username
+        // Now fetch the user details from your service layer based on the username
+        Users user = authenticationService.findByEmail(username);
+        Long userId = -1L;
+        if (authentication != null && authentication.getPrincipal() instanceof UsersPrincipal) {
+            UsersPrincipal userPrincipal = (UsersPrincipal) authentication.getPrincipal();
+            // Access custom field
+            userId = userPrincipal.getUserId();
+            // Use the custom field as needed
+            System.out.println("User's Id: " + userId);
+        }
+        // Create and return the UserRecord object based on user details
+        return new UserRecord(user.getEmail(), userId, "DVG", "Sample token");
+    }
 }

@@ -34,6 +34,8 @@ public class UsersInfo {
     private boolean isAgreedTheTerms;
 
     // One UsersInfo can have many Businesses
+
+    @JsonIgnore
     @OneToMany(mappedBy = "usersInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Business> businesses = new HashSet<>();
 }

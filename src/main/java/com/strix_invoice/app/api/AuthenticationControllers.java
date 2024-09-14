@@ -131,7 +131,6 @@ public class AuthenticationControllers {
     @GetMapping("/users-info")
     public UserRecord getUserInfo(HttpServletRequest request) {
         // Jwt Token is already verified in a filter or interceptor
-
         // Retrieve the authenticated user's details from Spring Security context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName(); // This should give you the username

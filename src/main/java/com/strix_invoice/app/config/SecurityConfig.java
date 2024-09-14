@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(basePath+"/register",basePath+"/login",basePath+"/authenticate",basePath+"/app/**",basePath+"/remove-cookie")
                         .permitAll()
                         .anyRequest().authenticated())
-                .httpBasic(Customizer.withDefaults())
+//                .httpBasic(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(JwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

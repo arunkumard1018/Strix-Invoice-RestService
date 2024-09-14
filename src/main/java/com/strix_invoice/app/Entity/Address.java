@@ -6,6 +6,7 @@
 
 package com.strix_invoice.app.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,6 +21,7 @@ public class Address {
     private String state;
     private Integer zip;
 
-    @OneToOne(mappedBy = "address")
-    private Business business;
+//    @OneToOne(mappedBy = "address")
+//    @JsonIgnore
+//    private Business business;
 }

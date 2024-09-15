@@ -10,10 +10,12 @@ import com.strix_invoice.app.service.JWTService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,9 +24,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("${api.base-path}")
-public class AuthenticationControllers {
+public class AuthenticationController {
 
     @Autowired
     private AuthenticationService authenticationService;
@@ -60,9 +63,7 @@ public class AuthenticationControllers {
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody Users users, HttpServletResponse response) {
-        // Authenticate user and generate JWT token (details omitted)
-        System.out.println(users.getEmail() + " " + users.getPassword());
-
+        log.info("User {} requested for Authentication ", users.getEmail());
         try {
             String token = authenticationService.authenticateUser(users);
             Cookie cookie = new Cookie("token", token);
@@ -71,9 +72,18 @@ public class AuthenticationControllers {
             cookie.setPath("/");
             cookie.setMaxAge(1 * 60 * 60); // Cookie expires in 1 day
             response.addCookie(cookie);
-            return ResponseEntity.ok("Login successful");
-        } catch (Exception e) {
+
+            log.info("User {} Authenticated successfully", users.getEmail());
+            return ResponseEntity.ok("Authentication successful");
+
+        } catch (BadCredentialsException ex) {
+            log.error("Exception : {}", ex.getMessage());
+            log.error("Authentication Failed for User {}", users.getEmail());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
+
+        } catch (Exception ex) {
+            log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication Failed");
         }
     }
 
@@ -85,7 +95,6 @@ public class AuthenticationControllers {
         cookie.setPath("/");
         cookie.setMaxAge(0); // Expire the cookie
         response.addCookie(cookie);
-        System.out.println("Logout Invoked" + cookie.getValue());
         return ResponseEntity.ok("Logout successful");
     }
 
@@ -130,21 +139,15 @@ public class AuthenticationControllers {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users-info")
     public UserRecord getUserInfo(HttpServletRequest request) {
-        // Jwt Token is already verified in a filter or interceptor
-        // Retrieve the authenticated user's details from Spring Security context
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // This should give you the username
-        // Now fetch the user details from your service layer based on the username
+        String username = authentication.getName();
         Users user = authenticationService.findByEmail(username);
         Long userId = -1L;
         if (authentication != null && authentication.getPrincipal() instanceof UsersPrincipal) {
             UsersPrincipal userPrincipal = (UsersPrincipal) authentication.getPrincipal();
-            // Access custom field
             userId = userPrincipal.getUserId();
-            // Use the custom field as needed
             System.out.println("User's Id: " + userId);
         }
-        // Create and return the UserRecord object based on user details
         return new UserRecord(user.getEmail(), userId, "DVG", "Sample token");
     }
 }

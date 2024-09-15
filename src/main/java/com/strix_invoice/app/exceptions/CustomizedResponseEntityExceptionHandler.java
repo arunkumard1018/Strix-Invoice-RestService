@@ -5,6 +5,7 @@
  */
 
 package com.strix_invoice.app.exceptions;
+
 import java.time.LocalDateTime;
 
 import com.strix_invoice.app.exceptions.custom.UserAlreadyExistsException;
@@ -44,17 +45,10 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         int count = 0;
         for (FieldError error : ex.getFieldErrors()) {
             count++;
-            errorMessage += count+". "+ error.getDefaultMessage() + ", ";
+            errorMessage += count + ". " + error.getDefaultMessage() + ", ";
         }
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), errorMessage, request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 
-//    @ExceptionHandler(PostNotFoundException.class)
-//    public final ResponseEntity<ErrorDetails> handlePostNotFoundException(Exception ex, WebRequest request)
-//            throws Exception {
-//        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
-//                request.getDescription(false));
-//        return new ResponseEntity<ErrorDetails>(errorDetails, HttpStatus.NOT_FOUND);
-//    }
 }

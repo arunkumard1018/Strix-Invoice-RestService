@@ -38,4 +38,9 @@ public class UsersInfo {
     @JsonIgnore
     @OneToMany(mappedBy = "usersInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Business> businesses = new HashSet<>();
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "usersInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Customers> customers = new HashSet<>();
+
 }

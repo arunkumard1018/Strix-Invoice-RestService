@@ -10,6 +10,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Data
 @Entity
 public class Business {
@@ -23,16 +26,17 @@ public class Business {
     private Integer stateCode;
     private String businessLogo;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
 
-    // Many Businesses can have one UsersInfo
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "users_info_id")
     @JsonIgnore
     private UsersInfo usersInfo;
 
-    // One BusinessModel can have one Address
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
-    private Address address;
+    @JsonIgnore
+    @OneToMany(mappedBy = "business", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Customers> customers = new HashSet<>();
 
 }

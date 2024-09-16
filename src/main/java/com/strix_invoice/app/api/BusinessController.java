@@ -11,6 +11,7 @@ import com.strix_invoice.app.exceptions.custom.ResourceNotFoundException;
 import com.strix_invoice.app.exceptions.custom.UserNotFoundException;
 import com.strix_invoice.app.model.BusinessModel;
 import com.strix_invoice.app.model.UsersPrincipal;
+import com.strix_invoice.app.projections.BusinessProjection;
 import com.strix_invoice.app.service.BusinessService;
 import com.strix_invoice.app.service.UserInfoService;
 import jakarta.validation.Valid;
@@ -54,7 +55,7 @@ public class BusinessController {
 
         Long userId = principal.getUserId();
         try {
-            log.info("Request to update business id {} for user id {}", businessId, principal.getUserId());
+            log.info("Request to update business id {} for user id {}", businessId, userId);
 
             businessService.updateBusiness(businessId, userId, businessModel);
             log.info("Business with ID {} updated successfully by user {}", businessId, userId);
@@ -80,7 +81,7 @@ public class BusinessController {
 
 
     @GetMapping("/business")
-    public Set<Business> businessForUsers(@AuthenticationPrincipal UsersPrincipal principal) {
+    public Set<BusinessProjection> businessForUsers(@AuthenticationPrincipal UsersPrincipal principal) {
         return businessService.retrieveAllBusinessFor(principal.getUserId());
     }
 

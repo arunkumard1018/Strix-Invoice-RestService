@@ -11,7 +11,8 @@ import com.strix_invoice.app.exceptions.custom.ResourceNotFoundException;
 import com.strix_invoice.app.exceptions.custom.UserNotFoundException;
 import com.strix_invoice.app.model.BusinessModel;
 import com.strix_invoice.app.model.UsersPrincipal;
-import com.strix_invoice.app.projections.BusinessProjection;
+import com.strix_invoice.app.projections.business.BusinessDataWithAddressProjection;
+import com.strix_invoice.app.projections.business.BusinessProjection;
 import com.strix_invoice.app.service.BusinessService;
 import com.strix_invoice.app.service.UserInfoService;
 import jakarta.validation.Valid;
@@ -25,6 +26,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -39,68 +41,76 @@ public class BusinessController {
     UserInfoService userInfoService;
 
     @PostMapping("/business")
-    public ResponseEntity<?> business(@Valid @RequestBody BusinessModel businessModel, @AuthenticationPrincipal UsersPrincipal principal) {
-        try {
-            businessService.createBusiness(businessModel, principal.getUserId());
-            return ResponseEntity.status(HttpStatus.CREATED).body("Business created successfully.");
-        } catch (Exception ex) {
-            // Add The Log for the exception for debugging (add a logger in production)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
-        }
+    public ResponseEntity business(@Valid @RequestBody BusinessModel businessModel,
+                                   @AuthenticationPrincipal UsersPrincipal principal) {
+        Long userId = principal.getUserId();
+        log.info("Request to Create Business By user with ID {} ", userId);
+
+        Business business = businessService.createBusiness(businessModel, userId);
+
+        log.info("User created Successfully with id {} for user {}", business.getId(), userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Business created successfully.");
+
     }
 
     @PutMapping("/business/{businessId}")
-    public ResponseEntity<?> updateBusiness(@Valid @RequestBody BusinessModel businessModel,
-                                      @PathVariable Long businessId, @AuthenticationPrincipal UsersPrincipal principal) {
+    public ResponseEntity updateBusiness(@Valid @RequestBody BusinessModel businessModel,
+                                         @PathVariable Long businessId,
+                                         @AuthenticationPrincipal UsersPrincipal principal) {
 
         Long userId = principal.getUserId();
-        try {
-            log.info("Request to update business id {} for user id {}", businessId, userId);
+        log.info("Request to update business id {} for user id {}", businessId, userId);
 
-            businessService.updateBusiness(businessId, userId, businessModel);
-            log.info("Business with ID {} updated successfully by user {}", businessId, userId);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Business updated successfully.");
+        businessService.updateBusiness(businessId, userId, businessModel);
 
-        } catch (UserNotFoundException ex) {
-            log.error("User with ID {} not found", userId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        log.info("Business with ID {} updated successfully by user {}", businessId, userId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Business updated successfully.");
 
-        } catch (BusinessNotFoundException ex) {
-            log.error("Business with ID {} not found", businessId);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-
-        }catch (AccessDeniedException ex){
-            log.error("Unauthorized access: User {} tried to update business {}", userId, businessId);
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
-
-        }catch (Exception ex) {
-            log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + ex.getMessage());
-        }
     }
 
 
     @GetMapping("/business")
-    public Set<BusinessProjection> businessForUsers(@AuthenticationPrincipal UsersPrincipal principal) {
-        return businessService.retrieveAllBusinessFor(principal.getUserId());
+    public Set<BusinessProjection> retrieveAllBusiness(@AuthenticationPrincipal UsersPrincipal principal) {
+        Long userId = principal.getUserId();
+        log.info("Request for Business by user with id {} ", userId);
+
+        Set<BusinessProjection> businessProjections = businessService.retrieveAllBusinessFor(userId);
+
+        log.info("Request for Business by user with id {} Dispatched Successfully.", userId);
+        return businessProjections;
+    }
+
+    @GetMapping("/business-with-address")
+    public List<BusinessDataWithAddressProjection> retrieveAllBusinessWithAddress(@AuthenticationPrincipal UsersPrincipal principal) {
+        Long userId = principal.getUserId();
+        log.info("Request for Business by user with id {} ", userId);
+
+        List<BusinessDataWithAddressProjection> business = businessService.retrieveAllBusinessWithAddress(userId);
+
+        log.info("Request for Business by user with id {} Dispatched Successfully.", userId);
+        return business;
     }
 
     @GetMapping("/business/{businessId}")
-    public ResponseEntity<Business> businessForUser(@PathVariable Long businessId, @AuthenticationPrincipal UsersPrincipal principal) {
-        Long currentUserId = principal.getUserId();
-        Business business = businessService.getBusiness(businessId).orElseThrow(() ->
-                new ResourceNotFoundException("Business Details Not Found For id :" + businessId));
+    public ResponseEntity<BusinessDataWithAddressProjection> retrieveBusiness(
+            @PathVariable Long businessId,
+            @AuthenticationPrincipal UsersPrincipal principal) {
 
-        if (!business.getUsersInfo().getId().equals(currentUserId)) {
-            throw new AccessDeniedException("You do not have permission to access this business Resource");
-        }
-        return ResponseEntity.status(HttpStatus.OK).body(business);
+        Long currentUserId = principal.getUserId();
+        log.info("Request for Business with business ID {} by user with ID {}", businessId, currentUserId);
+
+        // Fetch the business and address details
+        BusinessDataWithAddressProjection businessWithAddress = businessService.getBusinessWithAddress(businessId, currentUserId);
+
+        log.info("Business info dispatched successfully for Business ID {}", businessId);
+        // Return 200 OK response with the business data
+        return ResponseEntity.ok(businessWithAddress);
     }
 
     @GetMapping("/business-for/{businessId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Business> business(@PathVariable Long businessId) {
-        Business business = businessService.getBusiness(businessId)
+    public ResponseEntity<BusinessDataWithAddressProjection> business(@PathVariable Long businessId) {
+        BusinessDataWithAddressProjection business = businessService.getBusinessFor(businessId)
                 .orElseThrow(() -> new ResourceNotFoundException("Business Details Not Found For id :" + businessId));
 
         return ResponseEntity.status(HttpStatus.OK).body(business);

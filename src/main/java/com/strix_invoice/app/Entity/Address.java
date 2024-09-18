@@ -1,5 +1,5 @@
 /**
- * The {@code Address$} class represents Functionalities
+ * The {@code AddressModel$} class represents Functionalities
  *
  * @author ArunKumar D
  */
@@ -9,9 +9,13 @@ package com.strix_invoice.app.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+
 @Entity
+@Setter
+@Getter
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +25,4 @@ public class Address {
     private String state;
     private Integer zip;
 
-//    @OneToOne(mappedBy = "address")
-//    @JsonIgnore
-//    private Business business;
 }

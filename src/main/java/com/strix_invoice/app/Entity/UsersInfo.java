@@ -11,12 +11,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+
 @Entity
+@Setter
+@Getter
 public class UsersInfo {
 
     @Id
@@ -35,12 +39,10 @@ public class UsersInfo {
 
     // One UsersInfo can have many Businesses
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "usersInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "usersInfo", fetch = FetchType.LAZY)
     private Set<Business> businesses = new HashSet<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "usersInfo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "usersInfo", fetch = FetchType.LAZY)
     private Set<Customers> customers = new HashSet<>();
 
 }

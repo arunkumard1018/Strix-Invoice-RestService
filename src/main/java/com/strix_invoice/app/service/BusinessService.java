@@ -12,11 +12,11 @@ import com.strix_invoice.app.Entity.UsersInfo;
 import com.strix_invoice.app.exceptions.custom.BusinessNotFoundException;
 import com.strix_invoice.app.exceptions.custom.UserNotFoundException;
 import com.strix_invoice.app.model.BusinessModel;
+import com.strix_invoice.app.projections.business.BusinessDataWithAddressProjection;
+import com.strix_invoice.app.projections.business.BusinessProjection;
 import com.strix_invoice.app.repository.BusinessRepository;
 import com.strix_invoice.app.repository.UserInfoRepository;
 import com.strix_invoice.app.utility.Mapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -33,35 +33,33 @@ public class BusinessService {
     @Autowired
     private UserInfoRepository userInfoRepository;
 
-    public List<Business> retrieveAllBusiness(Long userId) {
-        List<Business> all = businessRepository.findAll();
-        return all;
+
+    @Transactional
+    public Business createBusiness(BusinessModel businessModel, Long userId) {
+        UsersInfo usersInfo = userInfoRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with id " + userId + " not found."));
+
+        Business business = Mapper.mapBusinessModelToBusiness(businessModel);
+        business.setUsersInfo(usersInfo);
+        business.setAddress(Mapper.mapBusinessModelToAddress(businessModel));
+        return businessRepository.save(business);
     }
 
     @Transactional
-    public void createBusiness(BusinessModel businessModel, Long userId) {
-        Optional<UsersInfo> usersInfo = userInfoRepository.findById(userId);
-        Business business = Mapper.mapBusinessModelToBusiness(businessModel);
-        business.setUsersInfo(usersInfo.get());
-        business.setAddress(Mapper.mapBusinessModelToAddress(businessModel));
-        businessRepository.save(business);
-    }
-
-
     public void updateBusiness(Long businessId, Long userId, BusinessModel businessModel) {
 
         UsersInfo usersInfo = userInfoRepository.findById(userId)
                 .orElseThrow(() -> {
-                    return new UserNotFoundException("User Resource Not Found");
+                    return new UserNotFoundException("User Resource with id" + userId + " not found.");
                 });
 
         Business business = businessRepository.findById(businessId)
                 .orElseThrow(() -> {
-                    return new BusinessNotFoundException("Business Resource Not Found");
+                    return new BusinessNotFoundException("Business Resource with id " + businessId + "  not found.");
                 });
 
         if (!business.getUsersInfo().getId().equals(userId)) {
-            throw new AccessDeniedException("You do not have access to update this business.");
+            throw new AccessDeniedException("User with ID " + userId + " does not have permission to update the business resource with ID " + businessId + ".");
         }
 
         Address address = business.getAddress();
@@ -78,17 +76,44 @@ public class BusinessService {
         businessRepository.save(business);
     }
 
-    public Set<Business> retrieveAllBusinessFor(Long userId) {
-        Set<Business> businesses = businessRepository.findByUserId(userId);
-        businesses.forEach(items -> System.out.print(items));
+    public Set<BusinessProjection> retrieveAllBusinessFor(Long userId) {
+        Set<BusinessProjection> businesses = businessRepository.findBusinessProjectionByUserId(userId);
         return businesses;
     }
 
+    /* Duplicate for getBusinessWithAddress */
+    public Optional<BusinessDataWithAddressProjection> getBusinessFor(Long businessId) {
+        Optional<BusinessDataWithAddressProjection> business = businessRepository.findBusinessWithAddressById(businessId);
+        return business;
+    }
 
     public Optional<Business> getBusiness(Long businessId) {
         Optional<Business> business = businessRepository.findById(businessId);
         return business;
     }
 
+    public BusinessDataWithAddressProjection getBusinessWithAddress(Long businessId, Long currentUserId) {
+        Optional<BusinessDataWithAddressProjection> business = businessRepository.findBusinessWithAddressById(businessId);
+
+        if (!business.isPresent()) {
+            throw new BusinessNotFoundException("Business with ID " + businessId + " not found.");
+        }
+
+        if (!business.get().getUsersInfo().getId().equals(currentUserId)) {
+            throw new AccessDeniedException("User with ID " + currentUserId + " does not have permission to access the business resource with ID " + businessId + ".");
+        }
+
+        return business.get();
+    }
+
+    public List<BusinessDataWithAddressProjection> retrieveAllBusinessWithAddress(Long userId) {
+        List<BusinessDataWithAddressProjection> allBusinessesWithAddress = businessRepository.findAllBusinessesWithAddress();
+        return allBusinessesWithAddress;
+    }
+
+    public List<Business> retrieveAllBusiness(Long userId) {
+        List<Business> all = businessRepository.findAll();
+        return all;
+    }
 
 }

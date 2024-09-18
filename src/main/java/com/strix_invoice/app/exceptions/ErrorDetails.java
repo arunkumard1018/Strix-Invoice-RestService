@@ -5,6 +5,9 @@
  */
 
 package com.strix_invoice.app.exceptions;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
 /**
@@ -14,7 +17,8 @@ import java.time.LocalDateTime;
  * this is standard class which handles all spring mvc raised exceptions and it returns formated error details
  */
 
-
+@Setter
+@Getter
 public class ErrorDetails {
 
     private LocalDateTime timeStamp;
@@ -27,30 +31,5 @@ public class ErrorDetails {
         this.message = message;
         this.details = details;
     }
-
-    public LocalDateTime getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(LocalDateTime timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public String getDetails() {
-        return details;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
-    }
-
 
 }

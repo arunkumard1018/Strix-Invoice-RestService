@@ -16,13 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -40,30 +36,49 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody RegisterUserInfo user) {
-        System.out.println(user);
-        Users checkUser = authenticationService.findByEmail(user.getEmail());
-        if (checkUser == null) {
-            try {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
-                Users registerUser = authenticationService.register(user);
-                return ResponseEntity.status(HttpStatus.CREATED).build();
-            } catch (Error e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-            }
+        log.info("Request for User Registration by {} ", user.getName());
+        Users registeredUser = authenticationService.findByEmail(user.getEmail());
+
+        if (registeredUser != null) {
+            log.info("User with email {} already registered with the user ID {}", user.getEmail(), registeredUser.getId());
+            throw new UserAlreadyExistsException("email Already registered");
         }
-        throw new UserAlreadyExistsException("email Already registered");
-    }
+
+        try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            Users savedUser = authenticationService.register(user);
+
+            log.info("User {} registered successfully with ID {}",user.getEmail(),savedUser.getId());
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+
+        } catch (Error e) {
+            log.error("User Registration failed for user {} ",user.getEmail());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+}
 
     @PostMapping("/login")
     public UserRecord login(@RequestBody Users users) {
-        String token = authenticationService.authenticateUser(users);
-        Users user = authenticationService.findByEmail(users.getEmail());
-        return new UserRecord(user.getEmail(), user.getId(), "DVG", token);
+        log.info("User {} requested for Authentication Token", users.getEmail());
+        try {
+            String token = authenticationService.authenticateUser(users);
+            log.info("User {} Authenticated successfully and Auth Token Dispatched", users.getEmail());
+            return new UserRecord(users.getEmail(), token);
+
+        } catch (BadCredentialsException ex) {
+            log.error("Authentication Failed for User {}", users.getEmail());
+            throw ex;
+        } catch (Exception ex) {
+            log.error("An unexpected error occurred during authentication: {}", ex.getMessage(), ex);
+            throw ex;
+        }
     }
 
     @PostMapping("/authenticate")
     public ResponseEntity<?> authenticate(@RequestBody Users users, HttpServletResponse response) {
-        log.info("User {} requested for Authentication ", users.getEmail());
+        System.out.println(users);
+        log.info("User {} requested for Authentication Token ", users.getEmail());
+
         try {
             String token = authenticationService.authenticateUser(users);
             Cookie cookie = new Cookie("token", token);
@@ -73,17 +88,15 @@ public class AuthenticationController {
             cookie.setMaxAge(1 * 60 * 60); // Cookie expires in 1 day
             response.addCookie(cookie);
 
-            log.info("User {} Authenticated successfully", users.getEmail());
-            return ResponseEntity.ok("Authentication successful");
+            log.info("User {} Authenticated successfully and Auth Token Dispatched", users.getEmail());
+            return ResponseEntity.ok("Authentication successful and Auth Token Dispatched");
 
         } catch (BadCredentialsException ex) {
-            log.error("Exception : {}", ex.getMessage());
             log.error("Authentication Failed for User {}", users.getEmail());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Credentials");
-
+            throw ex;
         } catch (Exception ex) {
             log.error("An unexpected error occurred: {}", ex.getMessage(), ex);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication Failed");
+            throw ex;
         }
     }
 
@@ -110,44 +123,18 @@ public class AuthenticationController {
     }
 
     @GetMapping("/me")
-    public UserRecord getUser(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        Cookie jwtCookie = null;
-        if (cookies != null) {
-            jwtCookie = Arrays.stream(cookies)
-                    .filter(cookie -> "token".equals(cookie.getName()))
-                    .findFirst()
-                    .orElse(null);
-        }
-        String username = null;
-        String jwtToken = null;
-        if (jwtCookie != null) {
-            jwtToken = jwtCookie.getValue();
-        }
-        if (jwtCookie != null && jwtToken != null) {
-            username = jwtService.extractUsername(jwtToken);
-        }
-        Users user = authenticationService.findByEmail(username);
-        return new UserRecord(user.getEmail(), user.getId(), "DVG", "Sample token");
+    public Users getUser(@AuthenticationPrincipal UsersPrincipal principal) {
+        String userId = principal.getUsername();
+        Users users = authenticationService.findByEmail(userId);
+        return users;
     }
 
-    @GetMapping("/users")
-    public List<Users> getAllUsers() {
-        return authenticationService.getAllUsers();
-    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users-info")
-    public UserRecord getUserInfo(HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
+    public Users getUserInfo(@AuthenticationPrincipal UsersPrincipal principal) {
+        String username = principal.getUsername();
         Users user = authenticationService.findByEmail(username);
-        Long userId = -1L;
-        if (authentication != null && authentication.getPrincipal() instanceof UsersPrincipal) {
-            UsersPrincipal userPrincipal = (UsersPrincipal) authentication.getPrincipal();
-            userId = userPrincipal.getUserId();
-            System.out.println("User's Id: " + userId);
-        }
-        return new UserRecord(user.getEmail(), userId, "DVG", "Sample token");
+        return user;
     }
 }

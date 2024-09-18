@@ -22,13 +22,11 @@ public class Users {
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "users_roles", joinColumns = @JoinColumn(name = "users_id"))
     @Enumerated(EnumType.STRING)
-    @JsonIgnore
     private Set<UserRole> roles;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "id")
-    @JsonIgnore
     private UsersInfo usersInfo;
 
     private Boolean isVerified;

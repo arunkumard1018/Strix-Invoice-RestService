@@ -19,7 +19,7 @@ public class BusinessModel {
     private String gstin;
     private Integer hsn;
     private Integer stateCode;
-    @NotBlank(message = "Address Required")
+    @NotBlank(message = "AddressModel Required")
     private String address;
     @NotBlank(message = "City Required")
     private String city;

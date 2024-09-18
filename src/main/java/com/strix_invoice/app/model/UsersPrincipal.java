@@ -59,4 +59,9 @@ public class UsersPrincipal implements UserDetails {
     public Long getUserId() {
         return users.getId();
     }
+
+    public boolean isAdmin() {
+        return this.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+    }
 }

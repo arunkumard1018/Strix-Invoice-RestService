@@ -14,7 +14,7 @@ public interface CustomersWithAddressProjection {
     AddressDataProjection getBillingAddress();
     AddressDataProjection getShippingAddress();
 
-    @JsonIgnore
+//    @JsonIgnore
     UsersInfoProjection getUsersInfo();
     interface UsersInfoProjection{
         Long getId();

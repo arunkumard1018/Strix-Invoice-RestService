@@ -6,13 +6,14 @@
 
 package com.strix_invoice.app.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.strix_invoice.app.Entity.invoice.Invoice;
+import com.strix_invoice.app.records.BusinessType;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -30,6 +31,10 @@ public class Business {
     private Integer stateCode;
     private String businessLogo;
 
+    @Enumerated(EnumType.STRING)
+    private BusinessType businessType;
+
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
@@ -40,5 +45,8 @@ public class Business {
 
     @OneToMany(mappedBy = "business", fetch = FetchType.LAZY)
     private Set<Customers> customers = new HashSet<>();
+
+    @OneToMany(mappedBy = "business", fetch = FetchType.LAZY)
+    private List<Invoice> invoices;
 
 }

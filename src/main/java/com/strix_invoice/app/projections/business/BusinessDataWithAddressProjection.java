@@ -11,6 +11,7 @@ public interface BusinessDataWithAddressProjection {
     Integer getStateCode();
     String getBusinessLogo();
 
+
     AddressDataProjection getAddress();
 
     @JsonIgnore

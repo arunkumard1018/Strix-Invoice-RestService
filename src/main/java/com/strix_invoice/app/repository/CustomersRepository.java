@@ -5,6 +5,7 @@ import com.strix_invoice.app.projections.customers.CustomersProjection;
 import com.strix_invoice.app.projections.customers.CustomersWithAddressProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -41,10 +42,18 @@ public interface CustomersRepository extends JpaRepository<Customers, Long> {
      * @see CustomersWithAddressProjection
      */
     @Query("SELECT c FROM Customers c " +
-            "LEFT JOIN FETCH c.billingAddress b" +
-            "LEFT JOIN FETCH c.shippingAddress s" +
-            "LEFT JOIN FETCH c.usersInfo u WHERE c.id = :customerId")
+            "LEFT JOIN FETCH c.billingAddress b " +
+            "LEFT JOIN FETCH c.shippingAddress s " +
+            "WHERE c.id = :customerId")
     Optional<CustomersWithAddressProjection> retrieveCustomersWithAddressProjection(@Param("customerId") Long customerId);
+
+    /**
+     * Note : Retaining the Customers Details even after deleting the Business
+     * */
+    @Modifying
+    @Query("UPDATE Customers c SET c.business = NULL WHERE c.business.id = :businessId")
+    void setBusinessIdToNullForBusiness(@Param("businessId") Long businessId);
+
 }
 
 

@@ -15,6 +15,7 @@ import com.strix_invoice.app.model.BusinessModel;
 import com.strix_invoice.app.projections.business.BusinessDataWithAddressProjection;
 import com.strix_invoice.app.projections.business.BusinessProjection;
 import com.strix_invoice.app.repository.BusinessRepository;
+import com.strix_invoice.app.repository.CustomersRepository;
 import com.strix_invoice.app.repository.UserInfoRepository;
 import com.strix_invoice.app.utility.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,9 @@ public class BusinessService {
     private BusinessRepository businessRepository;
     @Autowired
     private UserInfoRepository userInfoRepository;
+
+    @Autowired
+    private CustomersRepository customersRepository;
 
 
     @Transactional
@@ -116,4 +120,16 @@ public class BusinessService {
         return all;
     }
 
+    @Transactional
+    public void deleteBusiness(Long businessId, Long userId) {
+        Business business = businessRepository.findById(businessId)
+                .orElseThrow(() -> new BusinessNotFoundException("Business with ID " + businessId + " not found."));
+
+        if(!business.getUsersInfo().getId().equals(userId)){
+            throw new AccessDeniedException("Don't Have Permission to Access Delete This Resource");
+        }
+
+        customersRepository.setBusinessIdToNullForBusiness(businessId);
+        businessRepository.delete(business);
+    }
 }

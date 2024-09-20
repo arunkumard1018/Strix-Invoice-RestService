@@ -114,8 +114,7 @@ public class CustomersController {
      * @throws AccessDeniedException     If the user lacks permission to delete the customer.
      * @throws UserNotFoundException     If the user does not exist in the system.
      * @throws BusinessNotFoundException If the business related to the customer is not found.
-     *                                   <p>
-     *                                   Note :
+     *
      */
     @DeleteMapping("/customers/{customersId}")
     public ResponseEntity deleteCustomers(@PathVariable Long customersId, @AuthenticationPrincipal UsersPrincipal principal) {

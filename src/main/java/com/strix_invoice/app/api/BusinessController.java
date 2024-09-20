@@ -107,6 +107,17 @@ public class BusinessController {
         return ResponseEntity.ok(businessWithAddress);
     }
 
+    @DeleteMapping("/business/{businessId}")
+    public ResponseEntity deleteBusiness(@PathVariable Long businessId,@AuthenticationPrincipal UsersPrincipal principal){
+        Long userId = principal.getUserId();
+        log.info("Request to Delete business with ID {} by user with ID {}.",businessId,userId);
+
+        businessService.deleteBusiness(businessId,userId);
+
+        log.info("user with ID {} Successfully Deleted business with ID {}.",userId,businessId);
+        return ResponseEntity.status(HttpStatus.OK).body("deleted Successfully");
+    }
+
     @GetMapping("/business-for/{businessId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<BusinessDataWithAddressProjection> business(@PathVariable Long businessId) {

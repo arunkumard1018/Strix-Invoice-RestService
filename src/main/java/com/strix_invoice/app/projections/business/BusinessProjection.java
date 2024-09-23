@@ -1,6 +1,7 @@
 package com.strix_invoice.app.projections.business;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.strix_invoice.app.records.BusinessType;
 
 public interface BusinessProjection {
     Long getId();
@@ -9,6 +10,7 @@ public interface BusinessProjection {
     Integer getHsn();
     Integer getStateCode();
     String getBusinessLogo();
+    BusinessType getBusinessType();
 
 
 

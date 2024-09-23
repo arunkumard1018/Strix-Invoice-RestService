@@ -6,6 +6,7 @@
 
 package com.strix_invoice.app.Entity.invoice;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.strix_invoice.app.records.GSTType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,9 +19,11 @@ import java.time.LocalDate;
 @Getter
 @Entity
 public class TransportInvoiceDetails{
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE,
+            generator = "transport_invoice_seq_gen")
+    @SequenceGenerator(name = "transport_invoice_seq_gen",
+            sequenceName = "transport_invoice_seq", allocationSize = 50)
     private Long id;
 
     @Enumerated(EnumType.STRING)
@@ -32,10 +35,11 @@ public class TransportInvoiceDetails{
 
     private Double price;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "invoice_id", referencedColumnName = "id")
-    private Invoice invoice;
+    private Invoices invoices;
 
     @NotNull
     private LocalDate date;

@@ -13,6 +13,7 @@ import com.strix_invoice.app.exceptions.custom.BusinessNotFoundException;
 import com.strix_invoice.app.exceptions.custom.UserNotFoundException;
 import com.strix_invoice.app.model.BusinessModel;
 import com.strix_invoice.app.projections.business.BusinessDataWithAddressProjection;
+import com.strix_invoice.app.projections.business.BusinessInfoProjection;
 import com.strix_invoice.app.projections.business.BusinessProjection;
 import com.strix_invoice.app.repository.BusinessRepository;
 import com.strix_invoice.app.repository.CustomersRepository;
@@ -71,6 +72,7 @@ public class BusinessService {
         business.setGstin(businessModel.getGstin());
         business.setHsn(businessModel.getHsn());
         business.setStateCode(businessModel.getStateCode());
+        business.setInvoicePrefix(businessModel.getInvoicePrefix());
 
         address.setAddress(businessModel.getAddress());
         address.setCity(businessModel.getCity());
@@ -131,5 +133,11 @@ public class BusinessService {
 
         customersRepository.setBusinessIdToNullForBusiness(businessId);
         businessRepository.delete(business);
+    }
+
+    public Optional<BusinessInfoProjection> findBusinessInfo(Long businessId) {
+        Optional<BusinessInfoProjection> businessProjection =
+                businessRepository.findByBusinessProjection(businessId);
+        return businessProjection;
     }
 }

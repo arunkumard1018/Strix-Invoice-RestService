@@ -8,10 +8,10 @@
         <version>3.3.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.strix-invoice</groupId>
-    <artifactId>strix-invoice</artifactId>
+    <groupId>com.strix-invoices</groupId>
+    <artifactId>strix-invoices</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>strix-invoice</name>
+    <name>strix-invoices</name>
     <description>Strix Invoice Application for Generating invoices</description>
     <url/>
     <licenses>
@@ -130,6 +130,16 @@
         <!--            <artifactId>spring-security-test</artifactId>-->
         <!--            <scope>test</scope>-->
         <!--        </dependency>-->
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-log4j2</artifactId>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>net.ttddyy</groupId>
+            <artifactId>datasource-proxy</artifactId>
+            <version>1.7</version>
+        </dependency>
 
     </dependencies>
 

@@ -22,12 +22,11 @@ public class Updater {
         return customers;
     }
 
-    public static Address updateAddress(Address address, AddressModel addressModel) {
+    public static void updateAddress(Address address, AddressModel addressModel) {
         address.setAddress(addressModel.getAddress());
         address.setCity(addressModel.getCity());
         address.setState(addressModel.getState());
         address.setZip(addressModel.getZip());
-        return address;
     }
 
 

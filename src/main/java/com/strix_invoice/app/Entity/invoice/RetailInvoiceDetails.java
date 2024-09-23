@@ -6,6 +6,7 @@
 
 package com.strix_invoice.app.Entity.invoice;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.strix_invoice.app.records.GSTType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -30,10 +31,11 @@ public class RetailInvoiceDetails {
 
     private Double price;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "invoice_id", referencedColumnName = "id")
-    private Invoice invoice;
+    private Invoices invoices;
 
     @Column(nullable = false)
     private String SKU;

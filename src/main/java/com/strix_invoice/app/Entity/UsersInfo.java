@@ -7,11 +7,9 @@
 package com.strix_invoice.app.Entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.strix_invoice.app.Entity.invoice.Invoice;
+import com.strix_invoice.app.Entity.invoice.Invoices;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -46,7 +44,7 @@ public class UsersInfo {
     private Set<Business> businesses = new HashSet<>();
 
     @OneToMany(mappedBy = "usersInfo", fetch = FetchType.LAZY)
-    private List<Invoice> invoices = new ArrayList<>();
+    private List<Invoices> invoices = new ArrayList<>();
 
     @OneToMany(mappedBy = "usersInfo", fetch = FetchType.LAZY)
     private Set<Customers> customers = new HashSet<>();

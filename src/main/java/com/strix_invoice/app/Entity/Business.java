@@ -6,7 +6,7 @@
 
 package com.strix_invoice.app.Entity;
 
-import com.strix_invoice.app.Entity.invoice.Invoice;
+import com.strix_invoice.app.Entity.invoice.Invoices;
 import com.strix_invoice.app.records.BusinessType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -34,8 +34,12 @@ public class Business {
     @Enumerated(EnumType.STRING)
     private BusinessType businessType;
 
+    private String invoicePrefix;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    private Integer invoiceSeq;
+
+
+    @OneToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST,CascadeType.MERGE})
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
@@ -47,6 +51,6 @@ public class Business {
     private Set<Customers> customers = new HashSet<>();
 
     @OneToMany(mappedBy = "business", fetch = FetchType.LAZY)
-    private List<Invoice> invoices;
+    private List<Invoices> invoices;
 
 }

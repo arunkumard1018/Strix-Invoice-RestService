@@ -64,4 +64,16 @@ public class CustomExceptionsHandler {
     }
 
 
+    @ExceptionHandler(InvalidRequestBodyException.class)
+    public final ResponseEntity<ErrorDetails> handlerInvalidRequestBodyException(InvalidRequestBodyException ex, WebRequest request) {
+        log.error("InvalidRequestBodyException : {}", ex.getMessage());
+
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
+                request.getDescription(false));
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
+
+
+
 }

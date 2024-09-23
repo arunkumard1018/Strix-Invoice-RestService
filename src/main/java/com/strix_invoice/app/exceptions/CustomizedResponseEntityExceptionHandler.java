@@ -13,10 +13,9 @@ import java.util.stream.Collectors;
 
 import com.strix_invoice.app.exceptions.custom.UserAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.lang.Nullable;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -41,7 +40,17 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
         log.debug("Validation errors: {}", errors);
 
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Validation failed", errors.toString());
+        errorDetails.setStatus(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
+
+    @Nullable
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        log.warn("JSON parse error: Failed to Read the Request");
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Failed to read request", ex.getMessage());
+        errorDetails.setStatus(HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+
 
 }

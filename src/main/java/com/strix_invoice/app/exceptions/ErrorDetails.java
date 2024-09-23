@@ -7,6 +7,7 @@
 package com.strix_invoice.app.exceptions;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +25,7 @@ public class ErrorDetails {
     private LocalDateTime timeStamp;
     private String message;
     private String details;
+    private Integer status;
 
     public ErrorDetails(LocalDateTime timeStamp, String message, String details) {
         super();
@@ -32,4 +34,7 @@ public class ErrorDetails {
         this.details = details;
     }
 
+    public void setStatus(HttpStatus status) {
+        this.status = status.value();
+    }
 }

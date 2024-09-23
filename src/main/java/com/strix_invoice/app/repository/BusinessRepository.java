@@ -2,10 +2,10 @@ package com.strix_invoice.app.repository;
 
 import com.strix_invoice.app.Entity.Business;
 import com.strix_invoice.app.projections.business.BusinessDataWithAddressProjection;
+import com.strix_invoice.app.projections.business.BusinessInfoProjection;
 import com.strix_invoice.app.projections.business.BusinessProjection;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,4 +28,6 @@ public interface BusinessRepository extends JpaRepository<Business, Long> {
     @Query("SELECT b FROM Business b LEFT JOIN FETCH b.address a LEFT JOIN b.usersInfo u WHERE b.id = :businessId")
     Optional<BusinessDataWithAddressProjection> findBusinessWithAddressById(@Param("businessId") Long businessId);
 
+    @Query("SELECT b FROM Business b WHERE b.id = :businessId")
+    Optional<BusinessInfoProjection> findByBusinessProjection(Long businessId);
 }

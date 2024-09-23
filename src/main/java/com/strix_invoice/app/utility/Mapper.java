@@ -20,6 +20,13 @@ public class Mapper {
         business.setGstin(businessModel.getGstin());
         business.setStateCode(businessModel.getStateCode());
         business.setHsn(businessModel.getHsn());
+        business.setBusinessType(businessModel.getBusinessType());
+        business.setInvoicePrefix(businessModel.getInvoicePrefix());
+        business.setInvoiceSeq(0);
+        if(businessModel.getInvoicePrefix() == null){
+            String prefix = Utility.generateInvoicePrefix(businessModel.getName());
+            business.setInvoicePrefix(prefix);
+        }
         return business;
     }
 
@@ -50,4 +57,5 @@ public class Mapper {
         address.setZip(addressModel.getZip());
         return  address;
     }
+
 }

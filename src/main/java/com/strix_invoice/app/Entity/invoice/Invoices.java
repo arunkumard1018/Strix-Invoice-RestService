@@ -1,11 +1,12 @@
 /**
- * The {@code Invoice$} class represents Functionalities
+ * The {@code Invoices$} class represents Functionalities
  *
  * @author ArunKumar D
  */
 
 package com.strix_invoice.app.Entity.invoice;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.strix_invoice.app.Entity.Address;
 import com.strix_invoice.app.Entity.Business;
 import com.strix_invoice.app.Entity.UsersInfo;
@@ -24,7 +25,7 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-public class Invoice {
+public class Invoices {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,22 +41,30 @@ public class Invoice {
     private PaymentStatus paymentStatus;
 
     @Column(nullable = true)
-    private Double sgst;
+    private Double igst;
 
     @Column(nullable = true)
     private Double cgst;
 
     @Column(nullable = true)
-    private Double igst;
+    private Double sgst;
 
     private Double discount;
 
     private Double invoiceAmount;
 
-    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY)
+
+    private Long customerId;
+    private String customerName;
+    private String customerEmail;
+    private String customerGST;
+
+    @OneToMany(mappedBy = "invoices", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<TransportInvoiceDetails> transportInvoiceDetails = new ArrayList<>();
 
-    @OneToMany(mappedBy = "invoice", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    @OneToMany(mappedBy = "invoices", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RetailInvoiceDetails> retailInvoiceDetails = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -66,20 +75,13 @@ public class Invoice {
     @JoinColumn(name = "users_info_id", referencedColumnName = "id")
     private UsersInfo usersInfo;
 
-    private Long customerId;
-    @NotNull
-    private String customerName;
-    private String customerEmail;
-
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "shipping_address", referencedColumnName = "id")
     private Address shippingAddress;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(optional = false, fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "billing_address", referencedColumnName = "id")
     private Address billingAddress;
-
-    private String customerGST;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

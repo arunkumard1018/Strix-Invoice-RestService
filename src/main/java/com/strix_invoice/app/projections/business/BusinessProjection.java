@@ -13,5 +13,4 @@ public interface BusinessProjection {
     BusinessType getBusinessType();
 
 
-
 }

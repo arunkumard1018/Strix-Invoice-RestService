@@ -122,13 +122,6 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/me")
-    public Users getUser(@AuthenticationPrincipal UsersPrincipal principal) {
-        String userId = principal.getUsername();
-        Users users = authenticationService.findByEmail(userId);
-        return users;
-    }
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users-info")

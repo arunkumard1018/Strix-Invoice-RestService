@@ -38,6 +38,10 @@ public class UsersInfo {
     private Integer zip;
     private boolean isAgreedTheTerms;
 
+    @OneToOne(fetch = FetchType.LAZY,cascade = {CascadeType.PERSIST,CascadeType.MERGE})
+    @JoinColumn(name = "active_business", referencedColumnName = "id")
+    private Business activeBusiness;
+
     // One UsersInfo can have many Businesses
 
     @OneToMany(mappedBy = "usersInfo", fetch = FetchType.LAZY)
@@ -50,3 +54,4 @@ public class UsersInfo {
     private Set<Customers> customers = new HashSet<>();
 
 }
+

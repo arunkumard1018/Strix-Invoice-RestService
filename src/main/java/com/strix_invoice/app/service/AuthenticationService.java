@@ -1,10 +1,14 @@
 package com.strix_invoice.app.service;
 
+import com.strix_invoice.app.Entity.Business;
 import com.strix_invoice.app.Entity.Users;
+import com.strix_invoice.app.Entity.UsersInfo;
 import com.strix_invoice.app.model.RegisterUserInfo;
 import com.strix_invoice.app.records.UserRole;
+import com.strix_invoice.app.repository.BusinessRepository;
 import com.strix_invoice.app.repository.UsersRepository;
 import com.strix_invoice.app.utility.SetUserInfo;
+import com.strix_invoice.app.utility.Utility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +30,8 @@ public class AuthenticationService {
     private UserInfoService userInfoService;
     @Autowired
     private AuthenticationManager authenticationManager;
+    @Autowired
+    private BusinessRepository businessRepository;
 
     @Transactional
     public Users register(RegisterUserInfo regUser) {
@@ -34,7 +40,18 @@ public class AuthenticationService {
         user.setPassword(regUser.getPassword());
         user.setRoles(new HashSet<>(Arrays.asList(UserRole.USER)));
         user.setIsVerified(true);
-        user.setUsersInfo(SetUserInfo.mapToUserInfo(regUser));
+
+        UsersInfo usersInfo = SetUserInfo.mapToUserInfo(regUser);
+        user.setUsersInfo(usersInfo);
+
+        Business business = new Business();
+        business.setName(regUser.getBusinessName());
+        business.setBusinessType(regUser.getBusinessType());
+        business.setInvoicePrefix(Utility.generateInvoicePrefix(regUser.getBusinessName()));
+        business.setInvoiceSeq(0);
+        business.setUsersInfo(usersInfo);
+        businessRepository.save(business);
+        usersInfo.setActiveBusiness(business);
         return usersRepository.save(user);
     }
 

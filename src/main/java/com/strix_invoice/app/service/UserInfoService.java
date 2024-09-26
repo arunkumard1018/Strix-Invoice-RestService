@@ -6,11 +6,14 @@
 
 package com.strix_invoice.app.service;
 
+import com.strix_invoice.app.Entity.Business;
 import com.strix_invoice.app.Entity.UsersInfo;
+import com.strix_invoice.app.exceptions.custom.BusinessNotFoundException;
 import com.strix_invoice.app.exceptions.custom.UserNotFoundException;
 import com.strix_invoice.app.projections.usersInfo.UsersInfoProjection;
 import com.strix_invoice.app.repository.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -19,7 +22,9 @@ import java.util.Optional;
 public class UserInfoService {
 
     @Autowired
-    UserInfoRepository userInfoRepository;
+    private UserInfoRepository userInfoRepository;
+    @Autowired
+    private BusinessService businessService;
 
     public void createUser(UsersInfo usersInfo){
         userInfoRepository.save(usersInfo);
@@ -33,5 +38,20 @@ public class UserInfoService {
         UsersInfoProjection users_info = userInfoRepository.findByUsersInfoProjection(userId)
                 .orElseThrow(() -> new UserNotFoundException("Users Info Not Exists"));
         return users_info;
+    }
+
+    public void updateActiveBusiness(Long businessId, Long userId) {
+        Business business = businessService.findBusiness(businessId)
+                .orElseThrow(() -> new BusinessNotFoundException("Business with Id " + businessId + " not found"));
+
+        if(!business.getUsersInfo().getId().equals(userId)){
+            throw new AccessDeniedException("user with id "+userId+" does not have access to business resource");
+        }
+
+        UsersInfo usersInfo = userInfoRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User Info Not found for Id "+userId));
+        usersInfo.setActiveBusiness(business);
+
+        userInfoRepository.save(usersInfo);
     }
 }

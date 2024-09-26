@@ -27,7 +27,7 @@ public class BusinessModel {
     private BusinessType businessType;
     @Size(max = 15)
     private String invoicePrefix;
-
+    private String businessLogo;
     @NotBlank(message = "AddressModel Required")
     private String address;
     @NotBlank(message = "City Required")

@@ -140,4 +140,8 @@ public class BusinessService {
                 businessRepository.findByBusinessProjection(businessId);
         return businessProjection;
     }
+
+    public Optional<Business> findBusiness(Long businessID) {
+        return businessRepository.findById(businessID);
+    }
 }

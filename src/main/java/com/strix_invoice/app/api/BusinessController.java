@@ -44,6 +44,7 @@ public class BusinessController {
     public ResponseEntity business(@Valid @RequestBody BusinessModel businessModel,
                                    @AuthenticationPrincipal UsersPrincipal principal) {
         Long userId = principal.getUserId();
+        System.out.println(businessModel);
         log.info("Request to Create Business By user with ID {} ", userId);
 
         Business business = businessService.createBusiness(businessModel, userId);
@@ -72,6 +73,7 @@ public class BusinessController {
     @GetMapping("/business")
     public Set<BusinessProjection> retrieveAllBusiness(@AuthenticationPrincipal UsersPrincipal principal) {
         Long userId = principal.getUserId();
+
         log.info("Request for Business by user with id {} ", userId);
 
         Set<BusinessProjection> businessProjections = businessService.retrieveAllBusinessFor(userId);

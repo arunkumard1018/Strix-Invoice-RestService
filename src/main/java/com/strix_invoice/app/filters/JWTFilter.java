@@ -91,10 +91,17 @@ public class JWTFilter extends OncePerRequestFilter {
 
                 log.info("Extracted username from JWT Token: {}", username);
             } else {
-                log.warn("Access Denied: No JWT Token provided.");
+                log.warn("Accessss Denied: No JWT Token provided.");
+                Cookie cookie = new Cookie("token", null);
+                cookie.setHttpOnly(true);
+                cookie.setSecure(false);  // Set true if you're on HTTPS
+                cookie.setPath("/");
+                cookie.setMaxAge(0);  // Expire the cookie
+                response.addCookie(cookie);
+
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Invalid JWT Token");
-                return;
+//                return;
             }
 
         } catch (Exception e) {

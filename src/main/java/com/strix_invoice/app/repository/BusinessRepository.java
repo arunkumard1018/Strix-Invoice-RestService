@@ -16,8 +16,7 @@ import java.util.Set;
 public interface BusinessRepository extends JpaRepository<Business, Long> {
 
     //Query to find all Business Without address
-    @Query("SELECT b.id as id, b.name as name, b.gstin as gstin, b.hsn as hsn, b.stateCode as stateCode, b.businessLogo as businessLogo " +
-            "FROM Business b WHERE b.usersInfo.id = :userId")
+    @Query("SELECT b FROM Business b WHERE b.usersInfo.id = :userId")
     Set<BusinessProjection> findBusinessProjectionByUserId(@Param("userId") Long userId);
 
     //Query  Fetch all businesses with their addresses

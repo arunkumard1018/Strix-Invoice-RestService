@@ -22,6 +22,8 @@ public class Mapper {
         business.setHsn(businessModel.getHsn());
         business.setBusinessType(businessModel.getBusinessType());
         business.setInvoicePrefix(businessModel.getInvoicePrefix());
+        business.setBusinessLogo(businessModel.getBusinessLogo());
+        business.setBusinessType(businessModel.getBusinessType());
         business.setInvoiceSeq(0);
         if(businessModel.getInvoicePrefix() == null){
             String prefix = Utility.generateInvoicePrefix(businessModel.getName());

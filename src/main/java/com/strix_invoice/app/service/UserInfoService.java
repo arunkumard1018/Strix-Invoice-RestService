@@ -15,6 +15,7 @@ import com.strix_invoice.app.repository.UserInfoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ public class UserInfoService {
         return users_info;
     }
 
+    @Transactional
     public void updateActiveBusiness(Long businessId, Long userId) {
         Business business = businessService.findBusiness(businessId)
                 .orElseThrow(() -> new BusinessNotFoundException("Business with Id " + businessId + " not found"));

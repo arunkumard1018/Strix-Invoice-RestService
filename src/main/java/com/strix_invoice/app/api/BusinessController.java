@@ -6,12 +6,11 @@
 package com.strix_invoice.app.api;
 
 import com.strix_invoice.app.Entity.Business;
-import com.strix_invoice.app.exceptions.custom.BusinessNotFoundException;
 import com.strix_invoice.app.exceptions.custom.ResourceNotFoundException;
-import com.strix_invoice.app.exceptions.custom.UserNotFoundException;
 import com.strix_invoice.app.model.BusinessModel;
 import com.strix_invoice.app.model.UsersPrincipal;
 import com.strix_invoice.app.projections.business.BusinessDataWithAddressProjection;
+import com.strix_invoice.app.projections.business.BusinessDto;
 import com.strix_invoice.app.projections.business.BusinessProjection;
 import com.strix_invoice.app.service.BusinessService;
 import com.strix_invoice.app.service.UserInfoService;
@@ -20,13 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Slf4j
@@ -41,56 +38,33 @@ public class BusinessController {
     UserInfoService userInfoService;
 
     @PostMapping("/business")
-    public ResponseEntity business(@Valid @RequestBody BusinessModel businessModel,
+    public ResponseEntity<BusinessDto> business(@Valid @RequestBody BusinessModel businessModel,
                                    @AuthenticationPrincipal UsersPrincipal principal) {
         Long userId = principal.getUserId();
         System.out.println(businessModel);
         log.info("Request to Create Business By user with ID {} ", userId);
 
         Business business = businessService.createBusiness(businessModel, userId);
+        BusinessDto businessDto = new BusinessDto(business);
 
         log.info("User created Successfully with id {} for user {}", business.getId(), userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Business created successfully.");
+        return ResponseEntity.status(HttpStatus.CREATED).body(businessDto);
 
     }
 
     @PutMapping("/business/{businessId}")
-    public ResponseEntity updateBusiness(@Valid @RequestBody BusinessModel businessModel,
+    public ResponseEntity<BusinessDto> updateBusiness(@Valid @RequestBody BusinessModel businessModel,
                                          @PathVariable Long businessId,
                                          @AuthenticationPrincipal UsersPrincipal principal) {
 
         Long userId = principal.getUserId();
         log.info("Request to update business id {} for user id {}", businessId, userId);
 
-        businessService.updateBusiness(businessId, userId, businessModel);
-
+        Business updateBusiness = businessService.updateBusiness(businessId, userId, businessModel);
+        BusinessDto businessDto = new BusinessDto(updateBusiness);
         log.info("Business with ID {} updated successfully by user {}", businessId, userId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Business updated successfully.");
+        return ResponseEntity.status(HttpStatus.OK).body(businessDto);
 
-    }
-
-
-    @GetMapping("/business")
-    public Set<BusinessProjection> retrieveAllBusiness(@AuthenticationPrincipal UsersPrincipal principal) {
-        Long userId = principal.getUserId();
-
-        log.info("Request for Business by user with id {} ", userId);
-
-        Set<BusinessProjection> businessProjections = businessService.retrieveAllBusinessFor(userId);
-
-        log.info("Request for Business by user with id {} Dispatched Successfully.", userId);
-        return businessProjections;
-    }
-
-    @GetMapping("/business-with-address")
-    public List<BusinessDataWithAddressProjection> retrieveAllBusinessWithAddress(@AuthenticationPrincipal UsersPrincipal principal) {
-        Long userId = principal.getUserId();
-        log.info("Request for Business by user with id {} ", userId);
-
-        List<BusinessDataWithAddressProjection> business = businessService.retrieveAllBusinessWithAddress(userId);
-
-        log.info("Request for Business by user with id {} Dispatched Successfully.", userId);
-        return business;
     }
 
     @GetMapping("/business/{businessId}")
@@ -118,6 +92,29 @@ public class BusinessController {
 
         log.info("user with ID {} Successfully Deleted business with ID {}.",userId,businessId);
         return ResponseEntity.status(HttpStatus.OK).body("deleted Successfully");
+    }
+
+    @GetMapping("/business")
+    public Set<BusinessProjection> retrieveAllBusiness(@AuthenticationPrincipal UsersPrincipal principal) {
+        Long userId = principal.getUserId();
+
+        log.info("Request for Business by user with id {} ", userId);
+
+        Set<BusinessProjection> businessProjections = businessService.retrieveAllBusinessFor(userId);
+
+        log.info("Request for Business by user with id {} Dispatched Successfully.", userId);
+        return businessProjections;
+    }
+
+    @GetMapping("/business-with-address")
+    public List<BusinessDataWithAddressProjection> retrieveAllBusinessWithAddress(@AuthenticationPrincipal UsersPrincipal principal) {
+        Long userId = principal.getUserId();
+        log.info("Request for Business by user with id {} ", userId);
+
+        List<BusinessDataWithAddressProjection> business = businessService.retrieveAllBusinessWithAddress(userId);
+
+        log.info("Request for Business by user with id {} Dispatched Successfully.", userId);
+        return business;
     }
 
     @GetMapping("/business-for/{businessId}")

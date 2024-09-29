@@ -29,4 +29,5 @@ public interface BusinessRepository extends JpaRepository<Business, Long> {
 
     @Query("SELECT b FROM Business b WHERE b.id = :businessId")
     Optional<BusinessInfoProjection> findByBusinessProjection(Long businessId);
+
 }

@@ -13,7 +13,6 @@ public interface BusinessDataWithAddressProjection {
     String getBusinessLogo();
     BusinessType getBusinessType();
 
-
     AddressDataProjection getAddress();
 
     @JsonIgnore

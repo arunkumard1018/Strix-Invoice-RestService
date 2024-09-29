@@ -20,6 +20,7 @@ import com.strix_invoice.app.repository.CustomersRepository;
 import com.strix_invoice.app.repository.UserInfoRepository;
 import com.strix_invoice.app.utility.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +52,7 @@ public class BusinessService {
     }
 
     @Transactional
-    public void updateBusiness(Long businessId, Long userId, BusinessModel businessModel) {
+    public Business updateBusiness(Long businessId, Long userId, BusinessModel businessModel) {
 
         UsersInfo usersInfo = userInfoRepository.findById(userId)
                 .orElseThrow(() -> {
@@ -73,13 +74,15 @@ public class BusinessService {
         business.setHsn(businessModel.getHsn());
         business.setStateCode(businessModel.getStateCode());
         business.setInvoicePrefix(businessModel.getInvoicePrefix());
+        business.setBusinessType(businessModel.getBusinessType());
 
         address.setAddress(businessModel.getAddress());
         address.setCity(businessModel.getCity());
         address.setState(businessModel.getState());
         address.setZip(businessModel.getZip());
 
-        businessRepository.save(business);
+        Business updatedBusiness = businessRepository.save(business);
+        return updatedBusiness;
     }
 
     public Set<BusinessProjection> retrieveAllBusinessFor(Long userId) {
@@ -144,4 +147,5 @@ public class BusinessService {
     public Optional<Business> findBusiness(Long businessID) {
         return businessRepository.findById(businessID);
     }
+
 }

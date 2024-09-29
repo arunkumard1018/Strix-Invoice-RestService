@@ -46,9 +46,35 @@ public class CustomizedResponseEntityExceptionHandler extends ResponseEntityExce
 
     @Nullable
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        log.warn("JSON parse error: Failed to Read the Request");
-        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Failed to read request", ex.getMessage());
+        log.warn("JSON parse error: Failed to read the request");
+
+        Throwable rootCause = ex.getMostSpecificCause();
+        String errorMessage;
+
+        if (rootCause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException) {
+            // Cast the root cause to InvalidFormatException
+            com.fasterxml.jackson.databind.exc.InvalidFormatException invalidFormatException = (com.fasterxml.jackson.databind.exc.InvalidFormatException) rootCause;
+
+            // Extracting field path and invalid value
+            String fieldName = invalidFormatException.getPath().stream()
+                    .map(reference -> reference.getFieldName())  // Only get the field name
+                    .reduce((first, second) -> second)           // Get the last field name in the path (most relevant)
+                    .orElse("unknown field");
+
+            Object invalidValue = invalidFormatException.getValue();
+            String targetType = invalidFormatException.getTargetType().getSimpleName();
+
+            // Constructing a clean error message
+            errorMessage = String.format("Invalid value '%s' for field '%s'. Expected type: %s.", invalidValue, fieldName, targetType);
+        } else {
+            // Default error message for other causes
+            errorMessage = rootCause != null ? rootCause.getMessage() : ex.getMessage();
+        }
+
+        // Log and return the detailed error response
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Failed to read request", errorMessage);
         errorDetails.setStatus(HttpStatus.BAD_REQUEST);
+
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
 

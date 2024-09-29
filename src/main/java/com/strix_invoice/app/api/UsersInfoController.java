@@ -6,8 +6,6 @@
 
 package com.strix_invoice.app.api;
 
-import com.strix_invoice.app.Entity.Business;
-import com.strix_invoice.app.Entity.UsersInfo;
 import com.strix_invoice.app.model.UsersPrincipal;
 import com.strix_invoice.app.projections.usersInfo.UsersInfoProjection;
 import com.strix_invoice.app.service.UserInfoService;
@@ -18,9 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -37,13 +33,14 @@ public class UsersInfoController {
         return ResponseEntity.status(HttpStatus.OK).body(byUsersInfoProjection);
     }
 
-    @PatchMapping("/users/active-business/{businessId}")
+    @PatchMapping("/business/active/{businessId}")
     public ResponseEntity updateActiveBusiness(@PathVariable Long businessId,
                                                @AuthenticationPrincipal UsersPrincipal principal) {
         Long userId = principal.getUserId();
 
-        userInfoService.updateActiveBusiness(businessId,userId);
+        userInfoService.updateActiveBusiness(businessId, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(Collections.singletonMap("Message", "Success"));
     }
+
 }

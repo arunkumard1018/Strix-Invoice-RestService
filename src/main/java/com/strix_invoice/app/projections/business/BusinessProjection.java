@@ -11,6 +11,7 @@ public interface BusinessProjection {
     Integer getStateCode();
     String getBusinessLogo();
     BusinessType getBusinessType();
-
+    String getInvoicePrefix();
+    Integer getInvoiceSeq();
 
 }

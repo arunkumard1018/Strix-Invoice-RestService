@@ -1,9 +1,7 @@
 package com.strix_invoice.app.projections.usersInfo;
 
 
-import com.strix_invoice.app.Entity.Business;
-import com.strix_invoice.app.records.BusinessType;
-
+import com.strix_invoice.app.projections.business.BusinessProjection;
 import java.util.List;
 
 public interface UsersInfoProjection {
@@ -12,13 +10,4 @@ public interface UsersInfoProjection {
     String getName();
     BusinessProjection getActiveBusiness();
     List<BusinessProjection> getBusinesses();
-
-    interface BusinessProjection{
-        Long getId();
-        String getName();
-        String getBusinessLogo();
-        BusinessType getBusinessType();
-        String getInvoicePrefix();
-        Integer getInvoiceSeq();
-    }
 }

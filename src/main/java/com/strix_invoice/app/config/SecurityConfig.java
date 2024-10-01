@@ -57,7 +57,7 @@ public class SecurityConfig {
                 .csrf(customizer -> customizer.disable())
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend's origin
+                    config.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:3000"));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
                     config.setAllowCredentials(true); // Allow cookies to be sent

@@ -1,5 +1,5 @@
 /**
- * The {@code UsersInfoController$} class represents Functionalities
+ * The {@code UsersInfoController$} class represents Functionalities for UserDetais
  *
  * @author ArunKumar D
  */
